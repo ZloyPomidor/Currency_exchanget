@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="currency_exhanget">
+    <output-path>$PROJECT_DIR$/out/artifacts/currency_exhanget</output-path>
+    <root id="archive" name="currency_exhanget.war">
+      <element id="artifact" artifact-name="untitled5:Web exploded" />
+    </root>
+  </artifact>
+</component>
