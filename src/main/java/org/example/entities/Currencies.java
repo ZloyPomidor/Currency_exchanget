@@ -7,13 +7,13 @@ public class Currencies {
 
     private Long id;
     private String code;
-    private String fullName;
+    private String name;
     private String sign;
 
-    public Currencies(Long id, String code, String fullName, String sign) {
+    public Currencies(Long id, String code, String name, String sign) {
         this.id = id;
         this.code = code;
-        this.fullName = fullName;
+        this.name = name;
         this.sign = sign;
     }
 
@@ -22,12 +22,12 @@ public class Currencies {
 
     @Override
     public String toString() {
-        return "Currencies{" +
-                "id=" + id +
-                ", code='" + code + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", sign='" + sign + '\'' +
-                '}';
+        return "{" + "\n" +
+                "\"id\": " + id + ","+ "\n" +
+                "\"code\": " + code + ","+ "\n" +
+                "\"name\": " + name + ","+ "\n" +
+                "\"sign\": " + sign + ","+ "\n" +
+                "}";
     }
 
     public long getId() {
@@ -46,12 +46,12 @@ public class Currencies {
         this.code = code;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getSign() {

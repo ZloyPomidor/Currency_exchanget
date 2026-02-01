@@ -21,13 +21,12 @@ public class CurrenciesServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Currencies reqCurrency = new Currencies();
-        resp.setContentType("text/html");
-        if(req.getParameter("code")== null|| req.getParameter("fullName") == null|| req.getParameter("sign") == null){
+        if(req.getParameter("code")== null|| req.getParameter("name") == null|| req.getParameter("sign") == null){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         reqCurrency.setCode(req.getParameter("code"));
-        reqCurrency.setFullName(req.getParameter("fullName"));
+        reqCurrency.setName(req.getParameter("name"));
         reqCurrency.setSign(req.getParameter("sign"));
         if(CurrenciesService.validateCurrencyExists(reqCurrency.getCode())){
             resp.setStatus(HttpServletResponse.SC_CONFLICT);

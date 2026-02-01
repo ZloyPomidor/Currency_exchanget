@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-@WebServlet("/exchanges")
+@WebServlet("/exchangeRates")
 public class ExchangeRatesServlet extends HttpServlet {
     ObjectWriter objectMapper = new ObjectMapper().writer().withDefaultPrettyPrinter();
     ExchangeRatesService exchangeRatesService = new ExchangeRatesService();
@@ -23,12 +23,12 @@ public class ExchangeRatesServlet extends HttpServlet {
         ExchangeRates reqExchangeRates = new ExchangeRates();
         CurrenciesService currenciesService = new CurrenciesService();
         resp.setContentType("text/html");
-        if(req.getParameter("baseCode") == null|| req.getParameter("targetCode") == null || req.getParameter("rate") == null){
+        if(req.getParameter("baseCurrencyCode") == null|| req.getParameter("targetCurrencyCode") == null || req.getParameter("rate") == null){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        Currencies baseCurrency = currenciesService.getCurrencyByCode(req.getParameter("baseCode"));
-        Currencies targetCurrency = currenciesService.getCurrencyByCode(req.getParameter("targetCode"));
+        Currencies baseCurrency = currenciesService.getCurrencyByCode(req.getParameter("baseCurrencyCode"));
+        Currencies targetCurrency = currenciesService.getCurrencyByCode(req.getParameter("targetCurrencyCode"));
         BigDecimal rate = new BigDecimal(req.getParameter("rate"));
 
         reqExchangeRates.setBaseCurrency(baseCurrency);

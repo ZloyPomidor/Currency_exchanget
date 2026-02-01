@@ -7,9 +7,7 @@ import org.example.utils.ConnectionManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -21,20 +19,20 @@ public class CurrenciesDao implements Dao<Long, Currencies> {
             WHERE id = ?
             """;
     private static final String SAVE_SQL = """
-            INSERT INTO currency_exchange.public.currencies(code, fullname, sign)
+            INSERT INTO currency_exchange.public.currencies(code, name, sign)
             VALUES (?, ?, ?)
             """;
     public static final String UPDATE_SQL = """
             UPDATE currency_exchange.public.currencies
             SET code = ?,
-            fullname = ?,
+            name = ?,
             sign = ?
             WHERE id = ?
             """;
     public static final String FIND_ALL_SQL = """
             SELECT id,
                    code,
-                   fullname,
+                   name,
                    sign
             FROM  currency_exchange.public.currencies
             """;
@@ -113,7 +111,7 @@ public class CurrenciesDao implements Dao<Long, Currencies> {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, currencies.getCode());
-            preparedStatement.setString(2, currencies.getFullName());
+            preparedStatement.setString(2, currencies.getName());
             preparedStatement.setString(3, currencies.getSign());
             preparedStatement.setLong(4, currencies.getId());
 
@@ -128,7 +126,7 @@ public class CurrenciesDao implements Dao<Long, Currencies> {
         try (Connection connection = ConnectionManager.open();
         var prepareStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             prepareStatement.setString(1, currencies.getCode());
-            prepareStatement.setString(2, currencies.getFullName());
+            prepareStatement.setString(2, currencies.getName());
             prepareStatement.setString(3, currencies.getSign());
 
             prepareStatement.executeUpdate();
@@ -159,7 +157,7 @@ public class CurrenciesDao implements Dao<Long, Currencies> {
         return new Currencies(
                 resultSet.getLong("id"),
                 resultSet.getString("code"),
-                resultSet.getString("fullname"),
+                resultSet.getString("name"),
                 resultSet.getString("sign")
         );
     }
