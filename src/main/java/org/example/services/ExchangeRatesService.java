@@ -29,8 +29,8 @@ public class ExchangeRatesService {
         Currencies baseCurrency = currenciesService.getCurrencyByCode(result.getBaseCurrency().getCode());
         Currencies targetCurrency = currenciesService.getCurrencyByCode(result.getTargetCurrency().getCode());
 
-        return new ExchangeRateResponse(baseCurrency.getCode(), baseCurrency.getFullName(), baseCurrency.getSign(),
-                targetCurrency.getCode(), targetCurrency.getFullName(), targetCurrency.getSign(), result.getRate());
+        return new ExchangeRateResponse(baseCurrency.getCode(), baseCurrency.getName(), baseCurrency.getSign(),
+                targetCurrency.getCode(), targetCurrency.getName(), targetCurrency.getSign(), result.getRate());
     }
 
     public ExchangeRates getExchangeRatesByCodes(String code){

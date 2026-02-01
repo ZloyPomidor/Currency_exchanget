@@ -7,17 +7,21 @@ import org.example.exceptions.ExchangeRateNotFoundException;
 import org.example.utils.BigDecimalUtil;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
 public class  ConversionService {
-    CurrenciesService  currenciesService = new CurrenciesService();
-    ExchangeRatesService exchangeRatesService = new ExchangeRatesService();
-    String USD = "USD";
+    private final CurrenciesService  currenciesService = new CurrenciesService();
+    private final ExchangeRatesService exchangeRatesService = new ExchangeRatesService();
+    private static final String USD = "USD";
+    private static final BigDecimal DEVISOR = new BigDecimal("1");
+
 
     public ConversionResponse getConversionResponse(ConversionRequest conversionRequest) {
         BigDecimal convertedRate= getConvertedRate(conversionRequest.fromCurrency(), conversionRequest.toCurrency());
-        BigDecimal convertedAmount = convertedRate.multiply(conversionRequest.amount());
+        BigDecimal convertedAmount = convertedRate.multiply(conversionRequest.amount())
+                .setScale(2, RoundingMode.HALF_UP);
         Currencies fromCurrency = currenciesService.getCurrencyByCode(conversionRequest.fromCurrency());
         Currencies toCurrency = currenciesService.getCurrencyByCode(conversionRequest.toCurrency());
         return new ConversionResponse(
@@ -28,10 +32,11 @@ public class  ConversionService {
                 convertedAmount);
     }
 
-    public static void main(String[] args) {
-        ConversionService  conversionService = new ConversionService();
-        System.out.printf(conversionService.getConversionRate("RUB","SAR")+"");
+    public String getConvertedAmount(ConversionRequest conversionRequest){
+        ConversionResponse conversionResponse = getConversionResponse(conversionRequest);
+        return "{ \"convertedAmount\" : " + conversionResponse.convertedAmount()+"}";
     }
+
 
     public BigDecimal getConversionRate(String from, String to) {
         List<String> defultCombinations = getCodesVariation(from,to);
@@ -45,11 +50,10 @@ public class  ConversionService {
             BigDecimal fromRate = getRateTo(USD, from, fromCombinations);
             return BigDecimalUtil.divide(toRate, fromRate);
         }
-        throw new ExchangeRateNotFoundException();//гений ты ты гений!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        throw new ExchangeRateNotFoundException();
     }
 
     private BigDecimal getRateTo(String from, String to,List<String> codes){
-        BigDecimal devisor = new BigDecimal("1");
         String defultExchangeCode = from+to;
         String reversExchangeCode = to+from;
         if(!codes.isEmpty()){
@@ -58,19 +62,18 @@ public class  ConversionService {
             }
             else {
                 BigDecimal rate = exchangeRatesService.getExchangeRatesByCodes(reversExchangeCode).getRate();
-                return BigDecimalUtil.divide(devisor,rate);
+                return BigDecimalUtil.divide(DEVISOR,rate);
             }
         }
         throw new ExchangeRateNotFoundException();
     }
 
     public BigDecimal getConvertedRate(String from, String to){
-        BigDecimal devisor = new BigDecimal("1");
         if(isExistsCodeCombination(from, to)){
            String code = getValidCodeCombination(from, to);
             if(!code.equals(from+to)){
                 BigDecimal rate = exchangeRatesService.getExchangeRatesByCodes(code).getRate();
-                return BigDecimalUtil.divide(devisor, rate);
+                return BigDecimalUtil.divide(DEVISOR, rate);
             }else
                 return exchangeRatesService.getExchangeRatesByCodes(code).getRate();
         }else if ( isExistsCodeCombination(from, USD)&&
@@ -86,15 +89,15 @@ public class  ConversionService {
                 return BigDecimalUtil.divide(baseRate, targetRate);
 
             }else if(!baseCode.equals(fromUSD) && !targetCode.equals(toUSD)){
-                BigDecimal resultConvertBaseRate =  BigDecimalUtil.divide(devisor, baseRate);
-                BigDecimal resultConvertTargetRate = BigDecimalUtil.divide(devisor, targetRate);
+                BigDecimal resultConvertBaseRate =  BigDecimalUtil.divide(DEVISOR, baseRate);
+                BigDecimal resultConvertTargetRate = BigDecimalUtil.divide(DEVISOR, targetRate);
                 return BigDecimalUtil.divide(resultConvertBaseRate, resultConvertTargetRate);
 
             }else if(baseCode.equals(fromUSD)){
-                BigDecimal resultConvertTargetRate = BigDecimalUtil.divide(devisor, targetRate);
+                BigDecimal resultConvertTargetRate = BigDecimalUtil.divide(DEVISOR, targetRate);
                 return BigDecimalUtil.divide(baseRate, resultConvertTargetRate);
             }else {
-                BigDecimal resultConvertBaseRate = BigDecimalUtil.divide(devisor, baseRate );
+                BigDecimal resultConvertBaseRate = BigDecimalUtil.divide(DEVISOR, baseRate );
                 return BigDecimalUtil.divide(resultConvertBaseRate, targetRate);
             }
         }else {

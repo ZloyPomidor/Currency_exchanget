@@ -3,12 +3,21 @@ package org.example.dto.response;
 import org.example.entities.Currencies;
 
 import java.math.BigDecimal;
-import java.time.temporal.ChronoUnit;
 
 public record ConversionResponse(
-                                 Currencies fromCurrency,
-                                 Currencies toCurrency,
-                                 BigDecimal convertedRate,
-                                 BigDecimal originalAmount,
+                                 Currencies baseCurrency,
+                                 Currencies targetCurrency,
+                                 BigDecimal rate,
+                                 BigDecimal amount,
                                  BigDecimal convertedAmount) {
+    @Override
+    public String toString() {
+        return  "{\"baseCurrency\":" + baseCurrency + "," + "\n" +
+                "\"targetCurrency\":" + targetCurrency + "," + "\n" +
+                "\"rate\": " + rate + "," + "\n" +
+                "\"amount\": " + amount + "," + "\n" +
+                "\"convertedAmount\": " + convertedAmount + "," + "\n" +
+                "}";
+    }
+
 }
