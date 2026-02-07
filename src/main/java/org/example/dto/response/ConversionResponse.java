@@ -1,6 +1,6 @@
 package org.example.dto.response;
 
-import org.example.entities.Currencies;
+import org.example.models.Currencies;
 
 import java.math.BigDecimal;
 
@@ -12,12 +12,12 @@ public record ConversionResponse(
                                  BigDecimal convertedAmount) {
     @Override
     public String toString() {
-        return  "{\"baseCurrency\":" + baseCurrency + "," + "\n" +
-                "\"targetCurrency\":" + targetCurrency + "," + "\n" +
-                "\"rate\": " + rate + "," + "\n" +
-                "\"amount\": " + amount + "," + "\n" +
-                "\"convertedAmount\": " + convertedAmount + "," + "\n" +
-                "}";
+        return  String.format("{\n" +
+                "\"baseCurrency\": %s, \n" +
+                "\"targetCurrency\":  %s, \n" +
+                "\"rate\":  %s, \n" +
+                "\"amount\":  %s, \n" +
+                "\"convertedAmount\":  %s \n" +
+                "}", baseCurrency, targetCurrency, rate, amount, convertedAmount);
     }
-
 }

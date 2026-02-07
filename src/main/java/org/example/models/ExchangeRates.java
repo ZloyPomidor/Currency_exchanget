@@ -1,4 +1,6 @@
-package org.example.entities;
+package org.example.models;
+
+import org.example.services.ExchangeRatesService;
 
 import java.math.BigDecimal;
 
@@ -11,22 +13,22 @@ public class ExchangeRates {
 
     public ExchangeRates() {}
 
-    public ExchangeRates(Long id, Currencies baseCurrencyId, Currencies targetCurrencyId, BigDecimal rate) {
+    public ExchangeRates(Long id, Currencies baseCurrency, Currencies targetCurrency, BigDecimal rate) {
         this.id = id;
-        this.baseCurrency = baseCurrencyId;
-        this.targetCurrency = targetCurrencyId;
+        this.baseCurrency = baseCurrency;
+        this.targetCurrency = targetCurrency;
         this.rate = rate;
 
     }
 
     @Override
     public String toString() {
-        return "ExchangeRates{" +
-                "baseCurrencyId=" + baseCurrency +
-                ", id=" + id +
-                ", targetCurrencyId=" + targetCurrency +
-                ", rate=" + rate +
-                '}';
+        return String.format("{\n" +
+                "\"id\": %d,\n" +
+                "\"baseCurrency\": %s,\n" +
+                "\"targetCurrency\": %s,\n" +
+                "\"rate\": %f\n" +
+                "}", id, baseCurrency, targetCurrency, rate);
     }
 
     public Currencies getBaseCurrency() {

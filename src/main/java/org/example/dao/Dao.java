@@ -1,7 +1,5 @@
 package org.example.dao;
 
-import org.example.entities.Currencies;
-
 import java.util.List;
 import java.util.Optional;
 

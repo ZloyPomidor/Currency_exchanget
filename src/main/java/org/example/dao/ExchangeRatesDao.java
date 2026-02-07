@@ -1,6 +1,6 @@
 package org.example.dao;
 
-import org.example.entities.ExchangeRates;
+import org.example.models.ExchangeRates;
 import org.example.utils.ConnectionManager;
 
 import java.sql.*;

@@ -1,6 +1,6 @@
 package org.example.dao;
 
-import org.example.entities.Currencies;
+import org.example.models.Currencies;
 import org.example.exceptions.CurrencyNotFoundException;
 import org.example.utils.ConnectionManager;
 

@@ -1,8 +1,6 @@
-package org.example.entities;
+package org.example.models;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder
 public class Currencies {
 
     private Long id;
@@ -22,12 +20,12 @@ public class Currencies {
 
     @Override
     public String toString() {
-        return "{" + "\n" +
-                "\"id\": " + id + ","+ "\n" +
-                "\"code\": " + code + ","+ "\n" +
-                "\"name\": " + name + ","+ "\n" +
-                "\"sign\": " + sign + ","+ "\n" +
-                "}";
+        return String.format("{\n"+
+                "\"id\": %d, \n" +
+                "\"code\": %s, \n" +
+                "\"name\": %s, \n" +
+                "\"sign\": %s \n" +
+                "}", id, code, name, sign);
     }
 
     public long getId() {

@@ -2,117 +2,78 @@ package org.example.services;
 
 import org.example.dto.request.ConversionRequest;
 import org.example.dto.response.ConversionResponse;
-import org.example.entities.Currencies;
+import org.example.models.Currencies;
+import org.example.exceptions.ConversionHasBeenFailedException;
 import org.example.exceptions.ExchangeRateNotFoundException;
 import org.example.utils.BigDecimalUtil;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class  ConversionService {
-    private final CurrenciesService  currenciesService = new CurrenciesService();
-    private final ExchangeRatesService exchangeRatesService = new ExchangeRatesService();
+    private final CurrenciesService  currenciesService;
+    private final ExchangeRatesService exchangeRatesService;
     private static final String USD = "USD";
-    private static final BigDecimal DEVISOR = new BigDecimal("1");
 
+    public ConversionService(CurrenciesService currenciesService, ExchangeRatesService exchangeRatesService) {
+        this.currenciesService = currenciesService;
+        this.exchangeRatesService = exchangeRatesService;
+    }
 
-    public ConversionResponse getConversionResponse(ConversionRequest conversionRequest) {
-        BigDecimal convertedRate= getConvertedRate(conversionRequest.fromCurrency(), conversionRequest.toCurrency());
-        BigDecimal convertedAmount = convertedRate.multiply(conversionRequest.amount())
+    public Optional<ConversionResponse> getConversionResponse(ConversionRequest conversionRequest) {
+        Optional<BigDecimal> convertedRate = getConversionRate(conversionRequest.fromCurrency(), conversionRequest.toCurrency());
+        if (convertedRate.isEmpty()) {
+            return Optional.empty();
+        }
+        BigDecimal convertedAmount = convertedRate.get().multiply(conversionRequest.amount())
                 .setScale(2, RoundingMode.HALF_UP);
         Currencies fromCurrency = currenciesService.getCurrencyByCode(conversionRequest.fromCurrency());
         Currencies toCurrency = currenciesService.getCurrencyByCode(conversionRequest.toCurrency());
-        return new ConversionResponse(
+        return Optional.of(new ConversionResponse(
                 fromCurrency,
                 toCurrency,
-                convertedRate,
+                convertedRate.get(),
                 conversionRequest.amount(),
-                convertedAmount);
-    }
-
-    public String getConvertedAmount(ConversionRequest conversionRequest){
-        ConversionResponse conversionResponse = getConversionResponse(conversionRequest);
-        return "{ \"convertedAmount\" : " + conversionResponse.convertedAmount()+"}";
+                convertedAmount));
     }
 
 
-    public BigDecimal getConversionRate(String from, String to) {
+    public Optional<BigDecimal> getConversionRate(String from, String to) {
         List<String> defultCombinations = getCodesVariation(from,to);
+
         if(!defultCombinations.isEmpty()){
-           return getRateTo(from,to,defultCombinations);
+           return Optional.ofNullable(getRateTo(from, to, defultCombinations));
         }
+
         List<String> toCombinations = getCodesVariation(USD,to);
         List<String> fromCombinations = getCodesVariation(USD,from);
+
         if(!toCombinations.isEmpty() && !fromCombinations.isEmpty()){
             BigDecimal toRate = getRateTo(USD, to,toCombinations);
             BigDecimal fromRate = getRateTo(USD, from, fromCombinations);
-            return BigDecimalUtil.divide(toRate, fromRate);
+            return Optional.of(BigDecimalUtil.divide(toRate, fromRate));
         }
-        throw new ExchangeRateNotFoundException();
+        return Optional.empty();
     }
 
     private BigDecimal getRateTo(String from, String to,List<String> codes){
         String defultExchangeCode = from+to;
-        String reversExchangeCode = to+from;
+        String turnedExchangeCode = to+from;
+
         if(!codes.isEmpty()){
             if(exchangeRatesService.validateExchangeRatesExists(defultExchangeCode)){
-                return exchangeRatesService.getExchangeRatesByCodes(defultExchangeCode).getRate();
+                return exchangeRatesService.getExchangeRateByCodes(defultExchangeCode).getRate();
             }
             else {
-                BigDecimal rate = exchangeRatesService.getExchangeRatesByCodes(reversExchangeCode).getRate();
-                return BigDecimalUtil.divide(DEVISOR,rate);
+                BigDecimal rate = exchangeRatesService.getExchangeRateByCodes(turnedExchangeCode).getRate();
+                return BigDecimalUtil.divideWithDefaultDividend(rate);
             }
         }
         throw new ExchangeRateNotFoundException();
-    }
-
-    public BigDecimal getConvertedRate(String from, String to){
-        if(isExistsCodeCombination(from, to)){
-           String code = getValidCodeCombination(from, to);
-            if(!code.equals(from+to)){
-                BigDecimal rate = exchangeRatesService.getExchangeRatesByCodes(code).getRate();
-                return BigDecimalUtil.divide(DEVISOR, rate);
-            }else
-                return exchangeRatesService.getExchangeRatesByCodes(code).getRate();
-        }else if ( isExistsCodeCombination(from, USD)&&
-                isExistsCodeCombination(to, USD)){
-            String baseCode = getValidCodeCombination(from, USD);
-            String targetCode = getValidCodeCombination(to, USD);
-            BigDecimal baseRate = exchangeRatesService.getExchangeRatesByCodes(baseCode).getRate();
-            BigDecimal targetRate = exchangeRatesService.getExchangeRatesByCodes(targetCode).getRate();
-            String fromUSD = from+ USD;
-            String toUSD = to+ USD;
-
-            if(baseCode.equals(fromUSD) && targetCode.equals(toUSD)){
-                return BigDecimalUtil.divide(baseRate, targetRate);
-
-            }else if(!baseCode.equals(fromUSD) && !targetCode.equals(toUSD)){
-                BigDecimal resultConvertBaseRate =  BigDecimalUtil.divide(DEVISOR, baseRate);
-                BigDecimal resultConvertTargetRate = BigDecimalUtil.divide(DEVISOR, targetRate);
-                return BigDecimalUtil.divide(resultConvertBaseRate, resultConvertTargetRate);
-
-            }else if(baseCode.equals(fromUSD)){
-                BigDecimal resultConvertTargetRate = BigDecimalUtil.divide(DEVISOR, targetRate);
-                return BigDecimalUtil.divide(baseRate, resultConvertTargetRate);
-            }else {
-                BigDecimal resultConvertBaseRate = BigDecimalUtil.divide(DEVISOR, baseRate );
-                return BigDecimalUtil.divide(resultConvertBaseRate, targetRate);
-            }
-        }else {
-            throw new RuntimeException("не  нашлось");
-        }
-    }
-
-
-
-    private String getValidCodeCombination(String from, String to){
-        return getCodesVariation(from,to).getFirst();
-    }
-
-    private boolean isExistsCodeCombination(String from, String to){
-        return !getCodesVariation(from,to).isEmpty();
     }
 
     private List<String> getCodesVariation(String from, String to){
